@@ -68,7 +68,7 @@ app.post("/api/price", async (req, res) => {
   }
 });
 
-// POST /order – save order
+// POST /order – save order (no notifications)
 app.post("/order", async (req, res) => {
   try {
     const { name, address, oil, qty } = req.body;

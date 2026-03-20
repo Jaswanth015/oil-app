@@ -1,36 +1,39 @@
-body{
-font-family:Arial;
-background:linear-gradient(135deg,#74ebd5,#9face6);
-text-align:center;
+body {
+  font-family: Arial;
+  background: linear-gradient(135deg, #74ebd5, #9face6);
+  text-align: center;
+  margin: 0;
+  padding: 20px;
 }
-.box{
-background:white;
-width:300px;
-margin:auto;
-padding:20px;
-border-radius:10px;
+.box {
+  background: white;
+  width: 300px;
+  margin: auto;
+  padding: 20px;
+  border-radius: 10px;
 }
-input,select{
-width:90%;
-padding:10px;
-margin:10px;
+input, select {
+  width: 90%;
+  padding: 10px;
+  margin: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
-button{
-background:green;
-color:white;
-padding:10px;
-border:none;
-cursor:pointer;
-display:block;
-width:80%;
-margin:10px auto;
-clear:both;
+button {
+  background: green;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 10px;
 }
-button:hover{
-background:darkgreen;
+button:hover {
+  background: darkgreen;
 }
-#orders{
-list-style:none;
+#orders {
+  list-style: none;
+  padding: 0;
 }
 .shop-info {
   background: #f9f3e2;
@@ -61,7 +64,6 @@ list-style:none;
   text-align: left;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-
 .order-item hr {
   margin-top: 10px;
   border-color: #ddd;
@@ -76,22 +78,4 @@ list-style:none;
   font-size: 0.9em;
   text-align: center;
   color: #856404;
-}
-.notification-toast {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: #4caf50;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  z-index: 1000;
-  font-weight: bold;
-  animation: fadeOut 3s forwards;
-}
-@keyframes fadeOut {
-  0% { opacity: 1; }
-  70% { opacity: 1; }
-  100% { opacity: 0; visibility: hidden; }
 }
