@@ -18,10 +18,30 @@
 </select>
 <input type="number" id="qty" placeholder="Quantity (units)" oninput="updateTinCountAndCost()">
 <p>📦 Total tins: <span id="tinCount">0</span> (1 unit = 15 kg tin)</p>
-<p>💰 Total Cost: ₹ <span id="totalCost">0</span> (₹500 per unit)</p>
-<p class="note">Note: 1 unit = 15 kg tin | Price per unit = ₹500</p>
+<p>💰 Total Cost: ₹ <span id="totalCost">0</span> (<span id="pricePerUnit">---</span> per unit)</p>
+<p class="note">Note: 1 unit = 15 kg tin | Price per unit = ₹<span id="priceNote">---</span></p>
 <button onclick="placeOrder()">Place Order</button>
 <p id="msg"></p>
 <script src="script.js"></script>
+<script>
+  let currentPrice = 500;
+  fetch("/api/price")
+    .then(res => res.json())
+    .then(data => {
+      currentPrice = data.price;
+      document.getElementById("pricePerUnit").innerText = currentPrice;
+      document.getElementById("priceNote").innerText = currentPrice;
+      updateTinCountAndCost();
+    })
+    .catch(err => console.error("Failed to load price", err));
+
+  window.updateTinCountAndCost = function() {
+    let qty = document.getElementById("qty").value;
+    let tins = qty * 15;
+    let cost = qty * currentPrice;
+    document.getElementById("tinCount").innerText = tins;
+    document.getElementById("totalCost").innerText = cost;
+  };
+</script>
 </body>
 </html>
