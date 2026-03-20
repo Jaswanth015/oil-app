@@ -16,7 +16,7 @@
   <button onclick="showAdminPanel()" style="background:#555;">🔧 Admin</button>
 </div>
 
-<!-- Hidden admin panel (initially hidden) -->
+<!-- Hidden admin panel -->
 <div id="adminPanel" style="display: none; margin-top: 20px;" class="box">
   <h3>⚙️ Update Price</h3>
   <label>Current price per unit: ₹<span id="adminCurrentPrice">---</span></label><br><br>
@@ -31,7 +31,6 @@
 
 <script src="script.js"></script>
 <script>
-  // Fetch current price when page loads (for display if admin panel opens)
   let currentPrice = 500;
   fetch("/api/price")
     .then(res => res.json())
@@ -68,7 +67,6 @@
           document.getElementById("adminMsg").innerText = "❌ " + data.error;
         } else {
           document.getElementById("adminMsg").innerText = data.message;
-          // Refresh current price display
           fetch("/api/price")
             .then(res => res.json())
             .then(data => {

@@ -10,7 +10,7 @@ const app = express();
 app.use(express.json());
 app.use(express.static("public"));
 
-const DEFAULT_PRICE = 500; // fallback if no price in DB
+const DEFAULT_PRICE = 500;
 
 // Ensure there is a price setting in the database
 async function ensurePriceSetting() {
@@ -46,10 +46,10 @@ app.get("/api/price", async (req, res) => {
   }
 });
 
-// POST update price (admin only, simple password check)
+// POST update price (admin)
 app.post("/api/price", async (req, res) => {
   const { price, adminPassword } = req.body;
-  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123"; // change this!
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
   if (adminPassword !== ADMIN_PASSWORD) {
     return res.status(403).json({ error: "Invalid admin password" });
   }
@@ -68,7 +68,7 @@ app.post("/api/price", async (req, res) => {
   }
 });
 
-// POST /order – uses current price from DB
+// POST /order – save order
 app.post("/order", async (req, res) => {
   try {
     const { name, address, oil, qty } = req.body;
@@ -77,13 +77,13 @@ app.post("/order", async (req, res) => {
       return res.status(400).json({ message: "❌ Invalid quantity" });
     }
 
-    // Get current price from DB
     const priceSetting = await Setting.findOne({ key: "pricePerUnit" });
     const pricePerUnit = priceSetting ? priceSetting.value : DEFAULT_PRICE;
     const cost = quantity * pricePerUnit;
 
     const newOrder = new Order({ name, address, oil, qty: quantity, cost });
     await newOrder.save();
+
     res.json({ message: `✅ Order placed! Total: ₹${cost}` });
   } catch (err) {
     console.error(err);

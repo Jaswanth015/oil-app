@@ -19,16 +19,7 @@ window.onload = function() {
   }
 };
 
-// UPDATE TIN COUNT AND COST (live)
-function updateTinCountAndCost() {
-  let qty = document.getElementById("qty").value;
-  let tins = qty * 15;
-  let cost = qty * 500;   // ₹500 per unit
-  document.getElementById("tinCount").innerText = tins;
-  document.getElementById("totalCost").innerText = cost;
-}
-
-// PLACE ORDER (send qty; server will compute cost)
+// PLACE ORDER
 function placeOrder() {
   let name = document.getElementById("name").value;
   let address = document.getElementById("address").value;
@@ -56,7 +47,7 @@ function placeOrder() {
     });
 }
 
-// LOAD ORDERS (SELLER) with summary and full details (including tins and cost)
+// LOAD ORDERS (manual)
 function loadOrders() {
   fetch("/orders")
     .then(res => res.json())
@@ -84,7 +75,10 @@ function loadOrders() {
         list.appendChild(li);
       });
 
-      // Add summary above the list
+      // Remove any existing summary before adding a new one
+      const existingSummary = document.querySelector(".summary");
+      if (existingSummary) existingSummary.remove();
+
       let summary = document.createElement("div");
       summary.className = "summary";
       summary.innerHTML = `
