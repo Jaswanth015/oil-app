@@ -19,16 +19,20 @@ window.onload = function() {
   }
 };
 
-// UPDATE TIN COUNT AND COST (live)
-function updateTinCountAndCost() {
+// UPDATE TIN COUNT AND COST (live) – now uses the dynamically loaded price
+// This function is defined here for compatibility, but the actual implementation
+// is overridden in order.html by the inline script that fetches the current price.
+// However, for other pages (customer.html) we still need a fallback.
+window.updateTinCountAndCost = function() {
   let qty = document.getElementById("qty").value;
   let tins = qty * 15;
-  let cost = qty * 500;   // ₹500 per unit
+  // Use the price that was fetched from the server and stored in window.currentPrice
+  let cost = qty * (window.currentPrice || 500);
   document.getElementById("tinCount").innerText = tins;
   document.getElementById("totalCost").innerText = cost;
-}
+};
 
-// PLACE ORDER (send qty; server will compute cost)
+// PLACE ORDER (send qty; server will compute cost using its own price)
 function placeOrder() {
   let name = document.getElementById("name").value;
   let address = document.getElementById("address").value;
@@ -56,7 +60,7 @@ function placeOrder() {
     });
 }
 
-// LOAD ORDERS (SELLER) with summary and full details (including tins and cost)
+// LOAD ORDERS (SELLER) – now removes any existing summary before adding a new one
 function loadOrders() {
   fetch("/orders")
     .then(res => res.json())
@@ -83,6 +87,10 @@ function loadOrders() {
         `;
         list.appendChild(li);
       });
+
+      // Remove any existing summary to prevent duplication
+      const existingSummary = document.querySelector(".summary");
+      if (existingSummary) existingSummary.remove();
 
       // Add summary above the list
       let summary = document.createElement("div");
