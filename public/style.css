@@ -52,3 +52,28 @@ list-style:none;
   border-radius: 8px;
   text-align: center;
 }
+.order-item {
+  background: white;
+  margin: 10px auto;
+  padding: 12px;
+  width: 90%;
+  border-radius: 8px;
+  text-align: left;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.order-item hr {
+  margin-top: 10px;
+  border-color: #ddd;
+}
+.note {
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  padding: 8px;
+  margin: 10px auto;
+  width: 85%;
+  border-radius: 5px;
+  font-size: 0.9em;
+  text-align: center;
+  color: #856404;
+}

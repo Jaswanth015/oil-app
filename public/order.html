@@ -8,7 +8,6 @@
 <h2>🥥 Order Coconut Oil</h2>
 <h3 id="welcome"></h3>
 
-<!-- Shop Information -->
 <div class="shop-info">
   <strong>🏪 JAYA LAKSHMI OILS AND GENERAL TRADERS</strong><br>
   📍 MALAMA CENTER, NARASARAOPETA
@@ -20,7 +19,12 @@
   <option value="Pure">Pure Coconut Oil</option>
   <option value="Organic">Organic Coconut Oil</option>
 </select>
-<input type="number" id="qty" placeholder="Quantity">
+<input type="number" id="qty" placeholder="Quantity (units)" oninput="updateTinCountAndCost()">
+
+<p>📦 Total tins: <span id="tinCount">0</span> (1 unit = 15 kg tin)</p>
+<p>💰 Total Cost: ₹ <span id="totalCost">0</span> (₹500 per unit)</p>
+<p class="note">Note: 1 unit = 15 kg tin | Price per unit = ₹500</p>
+
 <button onclick="placeOrder()">Place Order</button>
 <p id="msg"></p>
 <a href="seller.html">📊 View Seller Dashboard</a>

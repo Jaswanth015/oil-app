@@ -19,7 +19,16 @@ window.onload = function() {
   }
 };
 
-// PLACE ORDER
+// UPDATE TIN COUNT AND COST (live)
+function updateTinCountAndCost() {
+  let qty = document.getElementById("qty").value;
+  let tins = qty * 15;
+  let cost = qty * 500;   // ₹500 per unit
+  document.getElementById("tinCount").innerText = tins;
+  document.getElementById("totalCost").innerText = cost;
+}
+
+// PLACE ORDER (send qty; server will compute cost)
 function placeOrder() {
   let name = document.getElementById("name").value;
   let address = document.getElementById("address").value;
@@ -47,7 +56,7 @@ function placeOrder() {
     });
 }
 
-// LOAD ORDERS (SELLER) with summary
+// LOAD ORDERS (SELLER) with summary and full details (including tins and cost)
 function loadOrders() {
   fetch("/orders")
     .then(res => res.json())
@@ -57,11 +66,21 @@ function loadOrders() {
 
       let totalOrders = data.length;
       let totalQty = 0;
+      let totalRevenue = 0;
 
       data.forEach(o => {
         totalQty += parseInt(o.qty) || 0;
+        totalRevenue += o.cost || 0;
         let li = document.createElement("li");
-        li.innerText = `${o.name} - ${o.oil} (${o.qty}) [${o.status}]`;
+        li.className = "order-item";
+        li.innerHTML = `
+          <strong>👤 ${o.name}</strong><br>
+          📍 Address: ${o.address}<br>
+          🛒 Booked Items: ${o.oil} (${o.qty} units = ${o.qty * 15} tins)<br>
+          💰 Cost: ₹${o.cost || 0}<br>
+          📦 Status: ${o.status}
+          <hr>
+        `;
         list.appendChild(li);
       });
 
@@ -71,7 +90,9 @@ function loadOrders() {
       summary.innerHTML = `
         <strong>📊 Summary</strong><br>
         Total Orders: ${totalOrders}<br>
-        Total Quantity Sold: ${totalQty}
+        Total Quantity (units): ${totalQty}<br>
+        Total Tins: ${totalQty * 15}<br>
+        Total Revenue: ₹${totalRevenue}
       `;
       list.parentNode.insertBefore(summary, list);
     })
