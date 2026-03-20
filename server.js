@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(express.static("public"));
 
 // Price per unit (1 unit = 15 kg tin). Default to 500 if not set.
-const PRICE_PER_UNIT = process.env.PRICE_PER_UNIT || 500;
+const PRICE_PER_UNIT = process.env.PRICE_PER_UNIT || 501;
 
 // MongoDB connection
 const mongoURI = process.env.MONGODB_URI || "mongodb://localhost:27017/oilDB";
