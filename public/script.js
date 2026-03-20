@@ -1,125 +1,108 @@
-// LOGIN
-function login() {
-  let user = document.getElementById("user").value;
-  let pass = document.getElementById("pass").value;
+const express = require("express");
+const mongoose = require("mongoose");
+const Order = require("./models/order");
+const Setting = require("./models/setting");
+const dotenv = require("dotenv");
+dotenv.config();
 
-  if (user !== "" && pass !== "") {
-    localStorage.setItem("user", user);
-    window.location = "order.html";
-  } else {
-    document.getElementById("msg").innerText = "❌ Enter details";
+const app = express();
+
+app.use(express.json());
+app.use(express.static("public"));
+
+const DEFAULT_PRICE = 500;
+
+// Ensure there is a price setting in the database
+async function ensurePriceSetting() {
+  let priceSetting = await Setting.findOne({ key: "pricePerUnit" });
+  if (!priceSetting) {
+    priceSetting = new Setting({ key: "pricePerUnit", value: DEFAULT_PRICE });
+    await priceSetting.save();
+    console.log(`Created default price setting: ₹${DEFAULT_PRICE}`);
   }
+  return priceSetting;
 }
 
-// SHOW USER
-window.onload = function() {
-  if (document.getElementById("welcome")) {
-    document.getElementById("welcome").innerText =
-      "Welcome, " + localStorage.getItem("user");
+// MongoDB connection
+const mongoURI = process.env.MONGODB_URI || "mongodb://localhost:27017/oilDB";
+mongoose.connect(mongoURI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(async () => {
+  console.log("✅ Connected to MongoDB");
+  await ensurePriceSetting();
+})
+.catch(err => console.error("❌ MongoDB connection error:", err));
+
+// GET current price
+app.get("/api/price", async (req, res) => {
+  try {
+    const priceSetting = await Setting.findOne({ key: "pricePerUnit" });
+    const price = priceSetting ? priceSetting.value : DEFAULT_PRICE;
+    res.json({ price });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch price" });
   }
-};
+});
 
-<<<<<<< HEAD
-// UPDATE TIN COUNT AND COST (live) – now uses the dynamically loaded price
-// This function is defined here for compatibility, but the actual implementation
-// is overridden in order.html by the inline script that fetches the current price.
-// However, for other pages (customer.html) we still need a fallback.
-window.updateTinCountAndCost = function() {
-  let qty = document.getElementById("qty").value;
-  let tins = qty * 15;
-  // Use the price that was fetched from the server and stored in window.currentPrice
-  let cost = qty * (window.currentPrice || 500);
-  document.getElementById("tinCount").innerText = tins;
-  document.getElementById("totalCost").innerText = cost;
-};
-
-// PLACE ORDER (send qty; server will compute cost using its own price)
-=======
-// PLACE ORDER
->>>>>>> 7cdb440 (Remove all notifications, keep dynamic price and admin panel)
-function placeOrder() {
-  let name = document.getElementById("name").value;
-  let address = document.getElementById("address").value;
-  let oil = document.getElementById("oil").value;
-  let qty = document.getElementById("qty").value;
-
-  if (name == "" || address == "" || qty == "") {
-    document.getElementById("msg").innerText = "❌ Fill all details";
-    return;
+// POST update price (admin)
+app.post("/api/price", async (req, res) => {
+  const { price, adminPassword } = req.body;
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
+  if (adminPassword !== ADMIN_PASSWORD) {
+    return res.status(403).json({ error: "Invalid admin password" });
   }
+  if (!price || isNaN(price) || price <= 0) {
+    return res.status(400).json({ error: "Invalid price" });
+  }
+  try {
+    await Setting.findOneAndUpdate(
+      { key: "pricePerUnit" },
+      { value: price, updatedAt: Date.now() },
+      { upsert: true, new: true }
+    );
+    res.json({ message: `Price updated to ₹${price}` });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update price" });
+  }
+});
 
-  document.getElementById("msg").innerText = "⏳ Processing...";
+// POST /order – save order (no notifications)
+app.post("/order", async (req, res) => {
+  try {
+    const { name, address, oil, qty } = req.body;
+    const quantity = parseInt(qty);
+    if (isNaN(quantity)) {
+      return res.status(400).json({ message: "❌ Invalid quantity" });
+    }
 
-  fetch("/order", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, address, oil, qty })
-  })
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("msg").innerText = data.message;
-    })
-    .catch(err => {
-      document.getElementById("msg").innerText = "❌ Network error: " + err;
-    });
-}
+    const priceSetting = await Setting.findOne({ key: "pricePerUnit" });
+    const pricePerUnit = priceSetting ? priceSetting.value : DEFAULT_PRICE;
+    const cost = quantity * pricePerUnit;
 
-<<<<<<< HEAD
-// LOAD ORDERS (SELLER) – now removes any existing summary before adding a new one
-=======
-// LOAD ORDERS (manual)
->>>>>>> 7cdb440 (Remove all notifications, keep dynamic price and admin panel)
-function loadOrders() {
-  fetch("/orders")
-    .then(res => res.json())
-    .then(data => {
-      let list = document.getElementById("orders");
-      list.innerHTML = "";
+    const newOrder = new Order({ name, address, oil, qty: quantity, cost });
+    await newOrder.save();
 
-      let totalOrders = data.length;
-      let totalQty = 0;
-      let totalRevenue = 0;
+    res.json({ message: `✅ Order placed! Total: ₹${cost}` });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "❌ Server error" });
+  }
+});
 
-      data.forEach(o => {
-        totalQty += parseInt(o.qty) || 0;
-        totalRevenue += o.cost || 0;
-        let li = document.createElement("li");
-        li.className = "order-item";
-        li.innerHTML = `
-          <strong>👤 ${o.name}</strong><br>
-          📍 Address: ${o.address}<br>
-          🛒 Booked Items: ${o.oil} (${o.qty} units = ${o.qty * 15} tins)<br>
-          💰 Cost: ₹${o.cost || 0}<br>
-          📦 Status: ${o.status}
-          <hr>
-        `;
-        list.appendChild(li);
-      });
+// GET /orders – retrieve all orders
+app.get("/orders", async (req, res) => {
+  try {
+    const orders = await Order.find();
+    res.json(orders);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json([]);
+  }
+});
 
-<<<<<<< HEAD
-      // Remove any existing summary to prevent duplication
-      const existingSummary = document.querySelector(".summary");
-      if (existingSummary) existingSummary.remove();
-
-      // Add summary above the list
-=======
-      // Remove any existing summary before adding a new one
-      const existingSummary = document.querySelector(".summary");
-      if (existingSummary) existingSummary.remove();
-
->>>>>>> 7cdb440 (Remove all notifications, keep dynamic price and admin panel)
-      let summary = document.createElement("div");
-      summary.className = "summary";
-      summary.innerHTML = `
-        <strong>📊 Summary</strong><br>
-        Total Orders: ${totalOrders}<br>
-        Total Quantity (units): ${totalQty}<br>
-        Total Tins: ${totalQty * 15}<br>
-        Total Revenue: ₹${totalRevenue}
-      `;
-      list.parentNode.insertBefore(summary, list);
-    })
-    .catch(err => {
-      document.getElementById("orders").innerHTML = "<li>❌ Failed to load orders</li>";
-    });
-}
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
