@@ -19,6 +19,7 @@ window.onload = function() {
   }
 };
 
+<<<<<<< HEAD
 // UPDATE TIN COUNT AND COST (live) – now uses the dynamically loaded price
 // This function is defined here for compatibility, but the actual implementation
 // is overridden in order.html by the inline script that fetches the current price.
@@ -33,6 +34,9 @@ window.updateTinCountAndCost = function() {
 };
 
 // PLACE ORDER (send qty; server will compute cost using its own price)
+=======
+// PLACE ORDER
+>>>>>>> 7cdb440 (Remove all notifications, keep dynamic price and admin panel)
 function placeOrder() {
   let name = document.getElementById("name").value;
   let address = document.getElementById("address").value;
@@ -60,7 +64,11 @@ function placeOrder() {
     });
 }
 
+<<<<<<< HEAD
 // LOAD ORDERS (SELLER) – now removes any existing summary before adding a new one
+=======
+// LOAD ORDERS (manual)
+>>>>>>> 7cdb440 (Remove all notifications, keep dynamic price and admin panel)
 function loadOrders() {
   fetch("/orders")
     .then(res => res.json())
@@ -88,11 +96,18 @@ function loadOrders() {
         list.appendChild(li);
       });
 
+<<<<<<< HEAD
       // Remove any existing summary to prevent duplication
       const existingSummary = document.querySelector(".summary");
       if (existingSummary) existingSummary.remove();
 
       // Add summary above the list
+=======
+      // Remove any existing summary before adding a new one
+      const existingSummary = document.querySelector(".summary");
+      if (existingSummary) existingSummary.remove();
+
+>>>>>>> 7cdb440 (Remove all notifications, keep dynamic price and admin panel)
       let summary = document.createElement("div");
       summary.className = "summary";
       summary.innerHTML = `

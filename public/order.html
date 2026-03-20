@@ -30,20 +30,17 @@
 <a href="seller.html">📊 View Seller Dashboard</a>
 <script src="script.js"></script>
 <script>
-  // Fetch current price when page loads
-  let currentPrice = 500; // fallback
+  let currentPrice = 500;
   fetch("/api/price")
     .then(res => res.json())
     .then(data => {
       currentPrice = data.price;
       document.getElementById("pricePerUnit").innerText = currentPrice;
       document.getElementById("priceNote").innerText = currentPrice;
-      // If there is already a quantity, recalc
       updateTinCountAndCost();
     })
     .catch(err => console.error("Failed to load price", err));
 
-  // Override updateTinCountAndCost to use currentPrice
   window.updateTinCountAndCost = function() {
     let qty = document.getElementById("qty").value;
     let tins = qty * 15;

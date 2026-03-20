@@ -5,7 +5,7 @@ const OrderSchema = new mongoose.Schema({
   address: String,
   oil: String,
   qty: Number,
-  cost: { type: Number, default: 0 },  
+  cost: { type: Number, default: 0 },
   status: { type: String, default: "Booked" }
 });
 
