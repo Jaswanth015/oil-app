@@ -12,10 +12,24 @@
   📍 MALAMA CENTER, NARASARAOPETA
 </div>
 
-<p class="note">Note: 1 unit = 15 kg tin | Price per unit = ₹500</p>
+<p class="note">Note: 1 unit = 15 kg tin | Price per unit = ₹<span id="currentPrice">---</span></p>
 
 <button onclick="loadOrders()">Load Orders</button>
 <ul id="orders"></ul>
+
+<div style="margin-top: 20px;">
+  <a href="admin.html">⚙️ Admin – Update Price</a>
+</div>
+
 <script src="script.js"></script>
+<script>
+  // Fetch current price to display on the dashboard
+  fetch("/api/price")
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("currentPrice").innerText = data.price;
+    })
+    .catch(err => console.error("Failed to load price", err));
+</script>
 </body>
 </html>

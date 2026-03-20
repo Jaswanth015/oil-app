@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin – Update Price</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<h2>🔧 Admin Panel</h2>
+<div class="box">
+  <label>Current Price per Unit (₹):</label>
+  <p id="currentPrice">Loading...</p>
+  <hr>
+  <label>New Price (₹):</label>
+  <input type="number" id="newPrice" step="1" min="1">
+  <label>Admin Password:</label>
+  <input type="password" id="adminPassword">
+  <button onclick="updatePrice()">Update Price</button>
+  <p id="msg"></p>
+</div>
+<a href="seller.html">← Back to Seller Dashboard</a>
+<script>
+  // Fetch current price
+  fetch("/api/price")
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("currentPrice").innerText = `₹${data.price}`;
+    })
+    .catch(err => console.error(err));
+
+  function updatePrice() {
+    const price = document.getElementById("newPrice").value;
+    const password = document.getElementById("adminPassword").value;
+    if (!price || price <= 0) {
+      alert("Enter a valid price");
+      return;
+    }
+    fetch("/api/price", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ price: parseInt(price), adminPassword: password })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          document.getElementById("msg").innerText = "❌ " + data.error;
+        } else {
+          document.getElementById("msg").innerText = data.message;
+          // Refresh current price display
+          fetch("/api/price")
+            .then(res => res.json())
+            .then(data => {
+              document.getElementById("currentPrice").innerText = `₹${data.price}`;
+            });
+        }
+      })
+      .catch(err => {
+        document.getElementById("msg").innerText = "❌ Network error";
+      });
+  }
+</script>
+</body>
+</html>
