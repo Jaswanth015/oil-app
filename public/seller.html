@@ -17,13 +17,8 @@
 <button onclick="loadOrders()">Load Orders</button>
 <ul id="orders"></ul>
 
-<div style="margin-top: 20px;">
-  <a href="admin.html">⚙️ Admin – Update Price</a>
-</div>
-
 <script src="script.js"></script>
 <script>
-  // Fetch current price to display on the dashboard
   fetch("/api/price")
     .then(res => res.json())
     .then(data => {
