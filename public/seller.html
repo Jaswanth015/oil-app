@@ -15,16 +15,97 @@
 <p class="note">Note: 1 unit = 15 kg tin | Price per unit = ₹<span id="currentPrice">---</span></p>
 
 <button onclick="loadOrders()">Load Orders</button>
+<button onclick="toggleNotifications()" id="notifyToggle">🔔 Notifications ON</button>
 <ul id="orders"></ul>
 
 <script src="script.js"></script>
 <script>
+  // Fetch current price
   fetch("/api/price")
     .then(res => res.json())
     .then(data => {
       document.getElementById("currentPrice").innerText = data.price;
     })
     .catch(err => console.error("Failed to load price", err));
+
+  // Start polling for new orders
+  let notificationsEnabled = true;
+  let lastOrderIds = []; // store IDs of orders we've already notified about
+
+  function toggleNotifications() {
+    notificationsEnabled = !notificationsEnabled;
+    const btn = document.getElementById("notifyToggle");
+    btn.innerText = notificationsEnabled ? "🔔 Notifications ON" : "🔕 Notifications OFF";
+  }
+
+  function playBeep() {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      oscillator.frequency.value = 800;
+      gainNode.gain.value = 0.2;
+      oscillator.start();
+      gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.5);
+      oscillator.stop(audioCtx.currentTime + 0.5);
+    } catch (e) {
+      console.log("Audio not supported");
+    }
+  }
+
+  async function checkForNewOrders() {
+    try {
+      const res = await fetch("/orders");
+      const orders = await res.json();
+      // Sort by _id descending (newest first)
+      const sorted = orders.sort((a,b) => (b._id > a._id ? 1 : -1));
+      const currentIds = sorted.map(o => o._id);
+
+      // Find new orders that are not in lastOrderIds
+      const newOrders = sorted.filter(o => !lastOrderIds.includes(o._id));
+      if (newOrders.length > 0 && notificationsEnabled) {
+        // Play beep
+        playBeep();
+        // Show browser notification
+        if (Notification.permission === "granted") {
+          newOrders.forEach(order => {
+            const notification = new Notification("🛒 New Order!", {
+              body: `${order.name} ordered ${order.oil} (${order.qty} units = ₹${order.cost})`,
+              icon: "/favicon.ico" // optional, you can add a favicon
+            });
+            notification.onclick = () => window.focus();
+          });
+        } else if (Notification.permission !== "denied") {
+          Notification.requestPermission();
+        }
+        // Also show an alert? Not needed, but we'll keep it optional
+        // You could also display a toast message in the dashboard
+        const msgDiv = document.createElement("div");
+        msgDiv.className = "notification-toast";
+        msgDiv.innerText = `🎉 ${newOrders.length} new order(s) received!`;
+        document.body.appendChild(msgDiv);
+        setTimeout(() => msgDiv.remove(), 3000);
+      }
+      // Update lastOrderIds
+      lastOrderIds = currentIds;
+      // Refresh the order list
+      loadOrders();
+    } catch (err) {
+      console.error("Polling error", err);
+    }
+  }
+
+  // Request notification permission on load
+  if (Notification.permission === "default") {
+    Notification.requestPermission();
+  }
+
+  // Start polling every 10 seconds
+  setInterval(checkForNewOrders, 10000);
+  // Also run immediately
+  checkForNewOrders();
 </script>
 </body>
 </html>
